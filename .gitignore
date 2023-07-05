@@ -1,0 +1,8 @@
+build
+.build
+.devcontainer
+.vscode
+.DS_Store
+sdkconfig
+sdkconfig.old
+main/secrets.h
