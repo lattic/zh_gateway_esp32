@@ -24,6 +24,10 @@ extern "C"
     void zh_send_espnow_online_message_task(void *pvParameter);
     void zh_send_espnow_offline_message_task(void *pvParameter);
 
+    void zh_espnow_switch_send_mqtt_json_attributes_message(zh_espnow_data_t data, uint8_t mac[6]);
+    void zh_espnow_switch_send_mqtt_json_config_message(zh_espnow_data_t data, uint8_t mac[6]);
+    void zh_espnow_switch_send_mqtt_json_keep_alive_message(zh_espnow_data_t data, uint8_t mac[6]);
+
 #ifdef __cplusplus
 }
 #endif

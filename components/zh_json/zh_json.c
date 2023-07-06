@@ -211,3 +211,27 @@ void zh_send_espnow_offline_message_task(void *pvParameter)
     zh_espnow_send(broadcast_mac, (uint8_t *)&data, sizeof(zh_espnow_data_t));
     vTaskDelete(NULL);
 }
+
+void zh_espnow_switch_send_mqtt_json_attributes_message(zh_espnow_data_t data, uint8_t mac[6])
+{
+}
+
+void zh_espnow_switch_send_mqtt_json_config_message(zh_espnow_data_t data, uint8_t mac[6])
+{
+}
+
+void zh_espnow_switch_send_mqtt_json_keep_alive_message(zh_espnow_data_t data, uint8_t mac[6])
+{
+    extern esp_mqtt_client_handle_t client;
+    char *device_type = get_device_type_value_name(data.device_type);
+    char *status = "online";
+    char *topic = (char *)malloc(strlen(mqtt_topic_prefix) + strlen(device_type) + 21 + 1);
+    while (topic == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        topic = (char *)malloc(strlen(mqtt_topic_prefix) + strlen(device_type) + 21 + 1);
+    }
+    sprintf(topic, "%s/%s/" MAC_STR "/status", mqtt_topic_prefix, device_type, MAC2STR(mac));
+    esp_mqtt_client_publish(client, topic, status, 0, 2, true);
+    free(topic);
+}

@@ -115,6 +115,30 @@ void zh_espnow_event_handler(void *arg, esp_event_base_t event_base, int32_t eve
         {
             goto ESPNOW_EVENT_HANDLER_EXIT;
         }
+        switch (data.device_type)
+        {
+        case ZHDT_SWITCH:
+            switch (data.payload_type)
+            {
+            case ZHPT_ATTRIBUTES:
+                zh_espnow_switch_send_mqtt_json_attributes_message(data, recv_data->mac_addr);
+                break;
+            case ZHPT_KEEP_ALIVE:
+                zh_espnow_switch_send_mqtt_json_keep_alive_message(data, recv_data->mac_addr);
+                break;
+            case ZHPT_CONFIG:
+                zh_espnow_switch_send_mqtt_json_config_message(data, recv_data->mac_addr);
+                break;
+            default:
+                break;
+            }
+            break;
+        case ZHDT_LED:
+            /* code */
+            break;
+        default:
+            break;
+        }
     ESPNOW_EVENT_HANDLER_EXIT:
         free(recv_data->data); // Do not delete for prevent of memory leakage!!!
         break;
@@ -122,11 +146,11 @@ void zh_espnow_event_handler(void *arg, esp_event_base_t event_base, int32_t eve
         espnow_event_on_send_t *send_data = event_data;
         if (send_data->status == ESP_NOW_SEND_SUCCESS)
         {
-            // Reserved for future developments.
+            printf("ESPNOW message send OK.\n");
         }
         else
         {
-            // Reserved for future developments.
+            printf("ESPNOW message send fail.\n");
         }
         break;
     default:

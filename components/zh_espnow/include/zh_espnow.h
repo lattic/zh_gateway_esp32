@@ -8,6 +8,7 @@
 #include "esp_wifi.h"
 #include "esp_now.h"
 #include "esp_mac.h"
+#include "zh_json.h"
 #include "zh_config.h"
 
 #define ESPNOW_TASK_PRIORITY 3

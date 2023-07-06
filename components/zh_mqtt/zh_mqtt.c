@@ -7,7 +7,7 @@ static TaskHandle_t mqtt_json_attributes_message_task;
 static TaskHandle_t mqtt_json_keep_alive_message_task;
 static TaskHandle_t espnow_online_message_task;
 
-static esp_mqtt_client_handle_t client;
+esp_mqtt_client_handle_t client;
 
 extern char *mqtt_broker_url;
 extern char *mqtt_topic_prefix;
