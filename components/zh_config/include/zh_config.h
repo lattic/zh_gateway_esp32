@@ -211,18 +211,22 @@ typedef enum ha_switch_device_class_t
 #undef DF
 } ha_switch_device_class_t;
 
-#define HA_PAYLOAD_TYPE \
-    DF(HAPT_NONE, "")   \
-    DF(HAPT_ON, "ON")   \
-    DF(HAPT_OFF, "OFF")
+char *get_switch_device_class_value_name(ha_switch_device_class_t value);
+//***********************************************************************************//
+#define HA_ON_OFF_TYPE   \
+    DF(HAONOFT_NONE, "") \
+    DF(HAONOFT_ON, "ON") \
+    DF(HAONOFT_OFF, "OFF")
 
-typedef enum ha_payload_type_t
+typedef enum ha_on_off_type_t
 {
 #define DF(_value, _name) _value,
-    HA_PAYLOAD_TYPE
+    HA_ON_OFF_TYPE
 #undef DF
-} ha_payload_type_t;
+} ha_on_off_type_t;
 
+char *get_on_off_type_value_name(ha_on_off_type_t value);
+//***********************************************************************************//
 #define HA_CHIP_TYPE         \
     DF(HACHT_NONE, "")       \
     DF(HACHT_ESP32, "ESP32") \
@@ -241,8 +245,8 @@ typedef struct zh_switch_config_message_t
 {
     uint8_t unique_id;
     ha_switch_device_class_t device_class;
-    ha_payload_type_t payload_on;
-    ha_payload_type_t payload_off;
+    ha_on_off_type_t payload_on;
+    ha_on_off_type_t payload_off;
     bool enabled_by_default;
     bool optimistic;
     uint8_t qos;

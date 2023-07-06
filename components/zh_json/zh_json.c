@@ -293,6 +293,143 @@ void zh_espnow_switch_send_mqtt_json_attributes_message(zh_espnow_data_t device_
 
 void zh_espnow_switch_send_mqtt_json_config_message(zh_espnow_data_t device_data, uint8_t device_mac[6])
 {
+    extern esp_mqtt_client_handle_t client;
+    char *device_type = get_device_type_value_name(device_data.device_type);
+    char *platform = "\"platform\": \"mqtt\"";
+    char *name = (char *)malloc(strlen(device_type) + 23 + 1);
+    while (name == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        name = (char *)malloc(strlen(device_type) + 23 + 1);
+    }
+    sprintf(name, "\"name\": \"%s " MAC_STR "\"", device_type, MAC2STR(device_mac));
+    char *unique_id = (char *)malloc(31 + 1);
+    while (unique_id == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        unique_id = (char *)malloc(31 + 1);
+    }
+    sprintf(unique_id, "\"unique_id\": \"" MAC_STR "-%d\"", MAC2STR(device_mac), device_data.payload_data.config_message.switch_config_message.unique_id);
+    char *device_class = (char *)malloc(strlen(get_switch_device_class_value_name(device_data.payload_data.config_message.switch_config_message.device_class)) + 18 + 1);
+    while (device_class == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        device_class = (char *)malloc(strlen(get_switch_device_class_value_name(device_data.payload_data.config_message.switch_config_message.device_class)) + 18 + 1);
+    }
+    sprintf(device_class, "\"device_class\": \"%s\"", get_switch_device_class_value_name(device_data.payload_data.config_message.switch_config_message.device_class));
+    char *state_topic = (char *)malloc(strlen(mqtt_topic_prefix) + strlen(device_type) + 37 + 1);
+    while (state_topic == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        state_topic = (char *)malloc(strlen(mqtt_topic_prefix) + strlen(device_type) + 37 + 1);
+    }
+    sprintf(state_topic, "\"state_topic\": \"%s/%s/" MAC_STR "/state\"", mqtt_topic_prefix, device_type, MAC2STR(device_mac));
+    // value_template not used.
+    char *availability_topic = (char *)malloc(strlen(mqtt_topic_prefix) + strlen(device_type) + 45 + 1);
+    while (availability_topic == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        availability_topic = (char *)malloc(strlen(mqtt_topic_prefix) + strlen(device_type) + 45 + 1);
+    }
+    sprintf(availability_topic, "\"availability_topic\": \"%s/%s/" MAC_STR "/status\"", mqtt_topic_prefix, device_type, MAC2STR(device_mac));
+    char *command_topic = (char *)malloc(strlen(mqtt_topic_prefix) + strlen(device_type) + 37 + 1);
+    while (command_topic == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        command_topic = (char *)malloc(strlen(mqtt_topic_prefix) + strlen(device_type) + 37 + 1);
+    }
+    sprintf(command_topic, "\"command_topic\": \"%s/%s/" MAC_STR "/set\"", mqtt_topic_prefix, device_type, MAC2STR(device_mac));
+    char *json_attributes_topic = (char *)malloc(strlen(mqtt_topic_prefix) + strlen(device_type) + 52 + 1);
+    while (json_attributes_topic == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        json_attributes_topic = (char *)malloc(strlen(mqtt_topic_prefix) + strlen(device_type) + 52 + 1);
+    }
+    sprintf(json_attributes_topic, "\"json_attributes_topic\": \"%s/%s/" MAC_STR "/attributes\"", mqtt_topic_prefix, device_type, MAC2STR(device_mac));
+    char *enabled_by_default = NULL;
+    if (device_data.payload_data.config_message.switch_config_message.enabled_by_default == true)
+    {
+        enabled_by_default = "\"enabled_by_default\": \"true\"";
+    }
+    else if (device_data.payload_data.config_message.switch_config_message.enabled_by_default == false)
+    {
+        enabled_by_default = "\"enabled_by_default\": \"false\"";
+    }
+    char *optimistic = NULL;
+    if (device_data.payload_data.config_message.switch_config_message.optimistic == true)
+    {
+        optimistic = "\"optimistic\": \"true\"";
+    }
+    else if (device_data.payload_data.config_message.switch_config_message.optimistic == false)
+    {
+        optimistic = "\"optimistic\": \"false\"";
+    }
+    // payload_available not used.
+    // payload_not_available not used.
+    char *payload_on = (char *)malloc(strlen(get_on_off_type_value_name(device_data.payload_data.config_message.switch_config_message.payload_on)) + 16 + 1);
+    while (payload_on == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        payload_on = (char *)malloc(strlen(get_on_off_type_value_name(device_data.payload_data.config_message.switch_config_message.payload_on)) + 16 + 1);
+    }
+    sprintf(payload_on, "\"payload_on\": \"%s\"", get_on_off_type_value_name(device_data.payload_data.config_message.switch_config_message.payload_on));
+    char *payload_off = (char *)malloc(strlen(get_on_off_type_value_name(device_data.payload_data.config_message.switch_config_message.payload_off)) + 17 + 1);
+    while (payload_off == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        payload_off = (char *)malloc(strlen(get_on_off_type_value_name(device_data.payload_data.config_message.switch_config_message.payload_off)) + 17 + 1);
+    }
+    sprintf(payload_off, "\"payload_off\": \"%s\"", get_on_off_type_value_name(device_data.payload_data.config_message.switch_config_message.payload_off));
+    char *qos = (char *)malloc(10 + 1);
+    while (qos == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        qos = (char *)malloc(10 + 1);
+    }
+    sprintf(qos, "\"qos\": %d", device_data.payload_data.config_message.switch_config_message.qos);
+    char *retain = NULL;
+    if (device_data.payload_data.config_message.switch_config_message.retain == true)
+    {
+        retain = "\"retain\": \"true\"";
+    }
+    else if (device_data.payload_data.config_message.switch_config_message.retain == false)
+    {
+        retain = "\"retain\": \"false\"";
+    }
+    char *topic = (char *)malloc(strlen(mqtt_topic_prefix) + 29 + 1);
+    while (topic == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        topic = (char *)malloc(strlen(mqtt_topic_prefix) + 29 + 1);
+    }
+    sprintf(topic, "%s/switch/" MAC_STR "-%d/config", mqtt_topic_prefix, MAC2STR(device_mac), device_data.payload_data.config_message.switch_config_message.unique_id);
+    char *data = (char *)malloc(strlen(platform) + strlen(name) + strlen(unique_id) + strlen(device_class) + strlen(state_topic) +
+                                strlen(availability_topic) + strlen(command_topic) + strlen(json_attributes_topic) +
+                                strlen(enabled_by_default) + strlen(optimistic) + strlen(payload_on) + strlen(payload_off) +
+                                strlen(qos) + strlen(retain) + 30 + 1);
+    while (data == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        data = (char *)malloc(strlen(platform) + strlen(name) + strlen(unique_id) + strlen(device_class) + strlen(state_topic) +
+                              strlen(availability_topic) + strlen(command_topic) + strlen(json_attributes_topic) +
+                              strlen(enabled_by_default) + strlen(optimistic) + strlen(payload_on) + strlen(payload_off) +
+                              strlen(qos) + strlen(retain) + 30 + 1);
+    }
+    sprintf(data, "{ %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s }", platform, name, unique_id, device_class, state_topic, availability_topic,
+            command_topic, json_attributes_topic, enabled_by_default, optimistic, payload_on, payload_off, qos, retain);
+    esp_mqtt_client_publish(client, topic, data, 0, 2, true);
+    free(name);
+    free(unique_id);
+    free(device_class);
+    free(state_topic);
+    free(availability_topic);
+    free(command_topic);
+    free(json_attributes_topic);
+    free(payload_on);
+    free(payload_off);
+    free(qos);
+    free(topic);
+    free(data);
 }
 
 void zh_espnow_switch_send_mqtt_json_keep_alive_message(zh_espnow_data_t device_data, uint8_t device_mac[6])
