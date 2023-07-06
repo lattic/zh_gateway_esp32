@@ -184,7 +184,7 @@ void zh_send_espnow_online_message_task(void *pvParameter)
     uint8_t broadcast_mac[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     zh_keep_alive_message_t keep_alive_message;
     keep_alive_message.online_status = ONLINE;
-    keep_alive_message.message_frequency = 10;
+    keep_alive_message.message_frequency = 1;
     zh_espnow_data_t data;
     strcpy(data.net_name, ESPNOW_NET_NAME);
     data.device_type = ZHDT_GATEWAY;
@@ -193,7 +193,7 @@ void zh_send_espnow_online_message_task(void *pvParameter)
     for (;;)
     {
         zh_espnow_send(broadcast_mac, (uint8_t *)&data, sizeof(zh_espnow_data_t));
-        vTaskDelay(10000 / portTICK_PERIOD_MS);
+        vTaskDelay(keep_alive_message.message_frequency * 1000 / portTICK_PERIOD_MS);
     }
     vTaskDelete(NULL);
 }
@@ -212,26 +212,110 @@ void zh_send_espnow_offline_message_task(void *pvParameter)
     vTaskDelete(NULL);
 }
 
-void zh_espnow_switch_send_mqtt_json_attributes_message(zh_espnow_data_t data, uint8_t mac[6])
-{
-}
-
-void zh_espnow_switch_send_mqtt_json_config_message(zh_espnow_data_t data, uint8_t mac[6])
-{
-}
-
-void zh_espnow_switch_send_mqtt_json_keep_alive_message(zh_espnow_data_t data, uint8_t mac[6])
+void zh_espnow_switch_send_mqtt_json_attributes_message(zh_espnow_data_t device_data, uint8_t device_mac[6])
 {
     extern esp_mqtt_client_handle_t client;
-    char *device_type = get_device_type_value_name(data.device_type);
-    char *status = "online";
+    char *device_type = get_device_type_value_name(device_data.device_type);
+    char *chip_type = get_chip_type_value_name(device_data.payload_data.attributes_message.chip_type);
+    uint32_t secs;
+    uint32_t mins;
+    uint32_t hours;
+    uint32_t days;
+    char *type = (char *)malloc(strlen(device_type) + 10 + 1);
+    while (type == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        type = (char *)malloc(strlen(device_type) + 10 + 1);
+    }
+    sprintf(type, "\"Type\": \"%s\"", device_type);
+    char *mac = (char *)malloc(21 + 1);
+    while (mac == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        mac = (char *)malloc(21 + 1);
+    }
+    sprintf(mac, "\"MAC\": \"" MAC_STR "\"", MAC2STR(device_mac));
+    char *chip = (char *)malloc(strlen(chip_type) + 10 + 1);
+    while (chip == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        chip = (char *)malloc(strlen(chip_type) + 10 + 1);
+    }
+    sprintf(chip, "\"Chip\": \"%s\"", chip_type);
+    char *app_name = (char *)malloc(strlen(device_data.payload_data.attributes_message.app_name) + 14 + 1);
+    while (app_name == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        app_name = (char *)malloc(strlen(device_data.payload_data.attributes_message.app_name) + 14 + 1);
+    }
+    sprintf(app_name, "\"App name\": \"%s\"", device_data.payload_data.attributes_message.app_name);
+    char *app_ver = (char *)malloc(strlen(device_data.payload_data.attributes_message.app_version) + 17 + 1);
+    while (app_ver == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        app_ver = (char *)malloc(strlen(device_data.payload_data.attributes_message.app_version) + 17 + 1);
+    }
+    sprintf(app_ver, "\"App version\": \"%s\"", device_data.payload_data.attributes_message.app_version);
+    secs = device_data.payload_data.attributes_message.uptime;
+    mins = secs / 60;
+    hours = mins / 60;
+    days = hours / 24;
+    char *uptime = (char *)malloc(56 + 1);
+    while (uptime == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        uptime = (char *)malloc(56 + 1);
+    }
+    sprintf(uptime, "\"Uptime\": \"Days:%lu Hours:%lu Mins:%lu\"", days, hours - (days * 24), mins - (hours * 60));
+    char *topic = (char *)malloc(strlen(mqtt_topic_prefix) + strlen(device_type) + 25 + 1);
+    while (topic == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        topic = (char *)malloc(strlen(mqtt_topic_prefix) + strlen(device_type) + 25 + 1);
+    }
+    sprintf(topic, "%s/%s/" MAC_STR "/attributes", mqtt_topic_prefix, device_type, MAC2STR(device_mac));
+    char *data = (char *)malloc(strlen(type) + strlen(mac) + strlen(chip) + strlen(app_ver) + strlen(app_name) + strlen(uptime) + 14 + 1);
+    while (data == NULL)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+        data = (char *)malloc(strlen(type) + strlen(mac) + strlen(chip) + strlen(app_ver) + strlen(app_name) + strlen(uptime) + 14 + 1);
+    }
+    sprintf(data, "{ %s, %s, %s, %s, %s, %s }", type, mac, chip, app_name, app_ver, uptime);
+    esp_mqtt_client_publish(client, topic, data, 0, 2, true);
+    free(mac);
+    free(chip);
+    free(app_name);
+    free(app_ver);
+    free(uptime);
+    free(topic);
+    free(data);
+    vTaskDelete(NULL);
+}
+
+void zh_espnow_switch_send_mqtt_json_config_message(zh_espnow_data_t device_data, uint8_t device_mac[6])
+{
+}
+
+void zh_espnow_switch_send_mqtt_json_keep_alive_message(zh_espnow_data_t device_data, uint8_t device_mac[6])
+{
+    extern esp_mqtt_client_handle_t client;
+    char *device_type = get_device_type_value_name(device_data.device_type);
+    char *status = NULL;
+    if (device_data.payload_data.keep_alive_message.online_status == ONLINE)
+    {
+        status = "online";
+    }
+    else if (device_data.payload_data.keep_alive_message.online_status == OFFLINE)
+    {
+        status = "offline";
+    }
     char *topic = (char *)malloc(strlen(mqtt_topic_prefix) + strlen(device_type) + 21 + 1);
     while (topic == NULL)
     {
         vTaskDelay(1 / portTICK_PERIOD_MS);
         topic = (char *)malloc(strlen(mqtt_topic_prefix) + strlen(device_type) + 21 + 1);
     }
-    sprintf(topic, "%s/%s/" MAC_STR "/status", mqtt_topic_prefix, device_type, MAC2STR(mac));
+    sprintf(topic, "%s/%s/" MAC_STR "/status", mqtt_topic_prefix, device_type, MAC2STR(device_mac));
     esp_mqtt_client_publish(client, topic, status, 0, 2, true);
     free(topic);
 }
