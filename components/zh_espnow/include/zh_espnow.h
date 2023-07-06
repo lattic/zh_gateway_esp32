@@ -11,7 +11,7 @@
 #include "zh_json.h"
 #include "zh_config.h"
 
-#define ESPNOW_TASK_PRIORITY 3
+#define ESPNOW_TASK_PRIORITY 4
 #define ESPNOW_STACK_SIZE 3072
 #define ESPNOW_QUEUE_SIZE 32
 #define MAX_NUMBER_OF_ATTEMPTS_TO_SEND 5

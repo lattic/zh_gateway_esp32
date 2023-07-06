@@ -75,8 +75,7 @@ void zh_mqtt_event_handler(void *arg, esp_event_base_t event_base, int32_t event
         mqtt_is_connected = false;
         break;
     case MQTT_EVENT_DATA:
-        // ESP_LOGI(TAG, "MQTT_EVENT_DATA");
-        printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
+        // printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
         // printf("DATA=%.*s\r\n", event->data_len, event->data);
         break;
     default:

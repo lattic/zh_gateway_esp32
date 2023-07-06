@@ -146,11 +146,11 @@ void zh_espnow_event_handler(void *arg, esp_event_base_t event_base, int32_t eve
         espnow_event_on_send_t *send_data = event_data;
         if (send_data->status == ESP_NOW_SEND_SUCCESS)
         {
-            printf("ESPNOW message send OK.\n");
+            // printf("ESPNOW message send success.\n");
         }
         else
         {
-            printf("ESPNOW message send fail.\n");
+            // printf("ESPNOW message send fail.\n");
         }
         break;
     default:

@@ -289,7 +289,6 @@ void zh_espnow_switch_send_mqtt_json_attributes_message(zh_espnow_data_t device_
     free(uptime);
     free(topic);
     free(data);
-    vTaskDelete(NULL);
 }
 
 void zh_espnow_switch_send_mqtt_json_config_message(zh_espnow_data_t device_data, uint8_t device_mac[6])
