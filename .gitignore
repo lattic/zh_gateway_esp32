@@ -6,3 +6,5 @@ build
 sdkconfig
 sdkconfig.old
 main/secrets.h
+platformio.ini
+sdkconfig.wt32-eth01

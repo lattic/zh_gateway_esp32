@@ -8,7 +8,7 @@
 
 bool is_lan_connection = true; // If "true", the LAN connection will be used. If "false", the WiFi connection will be used. In case of using WiFi router must be set on channel 1.
 
-// Create file "secrets.h" with "main" folder with definitions below.
+// Create file "secrets.h" in "main" folder with definitions below.
 char *wifi_ssid = WIFI_SSID;
 char *wifi_pass = WIFI_PASS;
 char *mqtt_broker_url = MQTT_BROKER_URL;           // For example - "mqtt://mqttbroker.com".
