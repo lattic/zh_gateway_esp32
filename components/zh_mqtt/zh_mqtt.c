@@ -43,21 +43,21 @@ void zh_mqtt_event_handler(void *arg, esp_event_base_t event_base, int32_t event
     switch (event_id)
     {
     case MQTT_EVENT_CONNECTED:
-        char *topic = NULL;
-        char *device_type = NULL;
+        char *topic_for_subscribe = NULL;
+        char *supported_device_type = NULL;
         mqtt_is_connected = true;
-        for (zh_device_type_t i = 1; i < ZHDT_MAX; ++i)
+        for (zh_device_type_t i = 1; i <= ZHDT_MAX; ++i)
         {
-            device_type = get_device_type_value_name(i);
-            topic = (char *)malloc(strlen(mqtt_topic_prefix) + strlen(device_type) + 4);
-            while (topic == NULL)
+            supported_device_type = get_device_type_value_name(i);
+            topic_for_subscribe = (char *)calloc(1, strlen(mqtt_topic_prefix) + strlen(supported_device_type) + 4);
+            while (topic_for_subscribe == NULL)
             {
                 vTaskDelay(1 / portTICK_PERIOD_MS);
-                topic = (char *)malloc(strlen(mqtt_topic_prefix) + strlen(device_type) + 4);
+                topic_for_subscribe = (char *)calloc(1, strlen(mqtt_topic_prefix) + strlen(supported_device_type) + 4);
             }
-            sprintf(topic, "%s/%s/#", mqtt_topic_prefix, device_type);
-            esp_mqtt_client_subscribe(client, topic, 2);
-            free(topic);
+            sprintf(topic_for_subscribe, "%s/%s/#", mqtt_topic_prefix, supported_device_type);
+            esp_mqtt_client_subscribe(client, topic_for_subscribe, 2);
+            free(topic_for_subscribe);
         }
         xTaskCreatePinnedToCore(&zh_send_mqtt_json_config_message_task, "Send config message", JSON_STACK_SIZE, event->client, JSON_TASK_PRIORITY, NULL, tskNO_AFFINITY);
         xTaskCreatePinnedToCore(&zh_send_mqtt_json_attributes_message_task, "Send attributes message", JSON_STACK_SIZE, event->client, JSON_TASK_PRIORITY, &mqtt_json_attributes_message_task, tskNO_AFFINITY);
@@ -75,10 +75,75 @@ void zh_mqtt_event_handler(void *arg, esp_event_base_t event_base, int32_t event
         mqtt_is_connected = false;
         break;
     case MQTT_EVENT_DATA:
-        // printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
-        // printf("DATA=%.*s\r\n", event->data_len, event->data);
-        break;
-    default:
+        char incoming_topic[(event->topic_len) + 1];
+        memset(incoming_topic, 0, sizeof(incoming_topic));
+        strncat(incoming_topic, event->topic, event->topic_len);
+        uint8_t incoming_data_mac[6];
+        zh_device_type_t incoming_data_device_type = ZHDT_NONE;
+        zh_payload_type_t incoming_data_payload_type = ZHPT_NONE;
+        char *extracted_topic_data = strtok(incoming_topic, "/"); // Extract topic prefix.
+        extracted_topic_data = strtok(NULL, "/");                 // Extract device type.
+        if (extracted_topic_data == NULL)
+        {
+            break;
+        }
+        for (zh_device_type_t i = 1; i < ZHDT_MAX; ++i)
+        {
+            if (strncmp(extracted_topic_data, get_device_type_value_name(i), strlen(extracted_topic_data) + 1) == 0)
+            {
+                incoming_data_device_type = i;
+                break;
+            }
+        }
+        extracted_topic_data = strtok(NULL, "/"); // Extract MAC address.
+        if (extracted_topic_data == NULL)
+        {
+            break;
+        }
+        sscanf(extracted_topic_data, "%hhX-%hhX-%hhX-%hhX-%hhX-%hhX", &incoming_data_mac[0], &incoming_data_mac[1], &incoming_data_mac[2], &incoming_data_mac[3], &incoming_data_mac[4], &incoming_data_mac[5]);
+        extracted_topic_data = strtok(NULL, "/"); // Extract payload type.
+        if (extracted_topic_data != NULL)
+        {
+            for (zh_payload_type_t i = 1; i < ZHPT_MAX; ++i)
+            {
+                if (strncmp(extracted_topic_data, get_payload_type_value_name(i), strlen(extracted_topic_data) + 1) == 0)
+                {
+                    incoming_data_payload_type = i;
+                    break;
+                }
+            }
+        }
+        char incoming_payload[(event->data_len) + 1];
+        memset(incoming_payload, 0, sizeof(incoming_payload));
+        strncat(incoming_payload, event->data, event->data_len);
+        switch (incoming_data_device_type)
+        {
+        case ZHDT_GATEWAY:
+            if (strncmp(incoming_payload, "update", strlen(incoming_payload) + 1) == 0)
+            {
+                xTaskCreatePinnedToCore(&zh_self_ota_update_task, "Self OTA update", OTA_STACK_SIZE, NULL, OTA_TASK_PRIORITY, NULL, tskNO_AFFINITY);
+            }
+            break;
+        case ZHDT_SWITCH:
+            switch (incoming_data_payload_type)
+            {
+            case ZHPT_SET:
+                for (ha_on_off_type_t i = 1; i < HAONOFT_MAX; ++i)
+                {
+                    if (strncmp(incoming_payload, get_on_off_type_value_name(i), strlen(incoming_payload) + 1) == 0)
+                    {
+                        zh_send_espnow_switch_setup_message(i, incoming_data_mac);
+                        break;
+                    }
+                }
+                break;
+            default:
+                break;
+            }
+            break;
+        default:
+            break;
+        }
         break;
     }
 }

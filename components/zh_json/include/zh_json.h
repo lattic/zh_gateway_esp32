@@ -11,7 +11,7 @@
 #define JSON_TASK_PRIORITY 2
 #define JSON_STACK_SIZE 2048
 
-#define MAC_STR "%02X%02X%02X%02X%02X%02X"
+#define MAC_STR "%02X-%02X-%02X-%02X-%02X-%02X"
 
 #ifdef __cplusplus
 extern "C"
@@ -27,6 +27,8 @@ extern "C"
     void zh_espnow_switch_send_mqtt_json_attributes_message(zh_espnow_data_t device_data, uint8_t device_mac[6]);
     void zh_espnow_switch_send_mqtt_json_config_message(zh_espnow_data_t device_data, uint8_t device_mac[6]);
     void zh_espnow_switch_send_mqtt_json_keep_alive_message(zh_espnow_data_t device_data, uint8_t device_mac[6]);
+    void zh_espnow_switch_send_mqtt_json_status_message(zh_espnow_data_t device_data, uint8_t device_mac[6]);
+    void zh_send_espnow_switch_setup_message(ha_on_off_type_t status, uint8_t device_mac[6]);
 
 #ifdef __cplusplus
 }

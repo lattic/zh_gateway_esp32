@@ -4,6 +4,7 @@
 #include "esp_err.h"
 #include "mqtt_client.h"
 #include "zh_json.h"
+#include "zh_ota.h"
 #include "zh_config.h"
 
 #define MQTT_TASK_PRIORITY 3

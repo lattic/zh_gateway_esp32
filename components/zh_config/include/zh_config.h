@@ -43,13 +43,13 @@ char *get_device_type_value_name(zh_device_type_t value);
     DF(ZHPT_NONE, "")                 \
     DF(ZHPT_ATTRIBUTES, "attributes") \
     DF(ZHPT_KEEP_ALIVE, "status")     \
-    DF(ZHPT_SET, "")                  \
+    DF(ZHPT_SET, "set")               \
     DF(ZHPT_STATE, "state")           \
-    DF(ZHPT_UPDATE, "")               \
-    DF(ZHPT_RESTART, "")              \
-    DF(ZHPT_SYSTEM, "")               \
+    DF(ZHPT_UPDATE, "update")         \
+    DF(ZHPT_RESTART, "restart")       \
+    DF(ZHPT_SYSTEM, "system")         \
     DF(ZHPT_CONFIG, "config")         \
-    DF(ZHPT_FORWARD, "")              \
+    DF(ZHPT_FORWARD, "forward")       \
     DF(ZHPT_MAX, "")
 
 typedef enum zh_payload_type_t
@@ -213,10 +213,11 @@ typedef enum ha_switch_device_class_t
 
 char *get_switch_device_class_value_name(ha_switch_device_class_t value);
 //***********************************************************************************//
-#define HA_ON_OFF_TYPE   \
-    DF(HAONOFT_NONE, "") \
-    DF(HAONOFT_ON, "ON") \
-    DF(HAONOFT_OFF, "OFF")
+#define HA_ON_OFF_TYPE     \
+    DF(HAONOFT_NONE, "")   \
+    DF(HAONOFT_ON, "ON")   \
+    DF(HAONOFT_OFF, "OFF") \
+    DF(HAONOFT_MAX, "")
 
 typedef enum ha_on_off_type_t
 {
@@ -241,6 +242,32 @@ typedef enum ha_chip_type_t
 
 char *get_chip_type_value_name(ha_chip_type_t value);
 //***********************************************************************************//
+#define HA_LED_EFFECT_TYPE \
+    DF(HALET_NONE, "")     \
+    DF(HALET_MAX, "")
+
+typedef enum ha_led_effect_type_t
+{
+#define DF(_value, _name) _value,
+    HA_LED_EFFECT_TYPE
+#undef DF
+} ha_led_effect_type_t;
+//***********************************************************************************//
+#define HA_LED_TYPE   \
+    DF(HALT_NONE, "") \
+    DF(HALT_W, "")    \
+    DF(HALT_WW, "")   \
+    DF(HALT_RGB, "")  \
+    DF(HALT_RGBW, "") \
+    DF(HALT_RGBWW, "")
+
+typedef enum ha_led_type_t
+{
+#define DF(_value, _name) _value,
+    HA_LED_TYPE
+#undef DF
+} ha_led_type_t;
+//***********************************************************************************//
 typedef struct zh_switch_config_message_t
 {
     uint8_t unique_id;
@@ -251,19 +278,25 @@ typedef struct zh_switch_config_message_t
     bool optimistic;
     uint8_t qos;
     bool retain;
-} __attribute__((packed)) zh_switch_config_message_t;
+}
+__attribute__((packed)) zh_switch_config_message_t;
 //***********************************************************************************//
 typedef struct zh_led_status_message_t
 {
-    bool status;
-    uint8_t led_brightness;
-    uint16_t color_temperature;
-    uint8_t rgb_colors[3];
+    ha_on_off_type_t status;
+    uint8_t brightness;
+    uint16_t temperature;
+    uint8_t cold;
+    uint8_t warm;
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
+    ha_led_effect_type_t effect;
 } __attribute__((packed)) zh_led_status_message_t;
 
 typedef struct zh_switch_status_message_t
 {
-    bool status;
+    ha_on_off_type_t status;
 } __attribute__((packed)) zh_switch_status_message_t;
 //***********************************************************************************//
 typedef struct zh_attributes_message_t
@@ -302,6 +335,8 @@ typedef union
 typedef struct zh_espnow_data_t
 {
     char net_name[10];
+    uint8_t source_mac[6]; // Reserved.
+    uint8_t target_mac[6]; // Reserved.
     zh_device_type_t device_type;
     zh_payload_type_t payload_type;
     zh_payload_data_t payload_data;

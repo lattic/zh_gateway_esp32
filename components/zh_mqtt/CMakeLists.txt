@@ -3,4 +3,5 @@ idf_component_register(SRCS "zh_mqtt.c"
                     REQUIRES esp_common
                         mqtt
                         zh_json
+                        zh_ota
                         zh_config)

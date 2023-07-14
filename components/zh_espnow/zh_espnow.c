@@ -59,11 +59,11 @@ void zh_espnow_send(const uint8_t *target, const uint8_t *data, const uint8_t da
     espnow_queue.id = ESP_NOW_SEND;
     espnow_queue_send_data_t *send_data = &espnow_queue.data.send_data;
     memcpy(send_data->mac_addr, target, ESP_NOW_ETH_ALEN);
-    send_data->data = malloc(data_len);
+    send_data->data = calloc(1, data_len);
     while (send_data->data == NULL)
     {
         vTaskDelay(1 / portTICK_PERIOD_MS);
-        send_data->data = malloc(data_len);
+        send_data->data = calloc(1, data_len);
     }
     memcpy(send_data->data, data, data_len);
     send_data->data_len = data_len;
@@ -76,9 +76,13 @@ void zh_espnow_send_cb(const uint8_t *mac_addr, esp_now_send_status_t status)
     {
         xEventGroupSetBits(s_espnow_send_cb_status, DATA_SEND_SUCCESS);
     }
-    else
+    else if (status == ESP_NOW_SEND_FAIL)
     {
         xEventGroupSetBits(s_espnow_send_cb_status, DATA_SEND_FAIL);
+    }
+    else
+    {
+        return;
     }
 }
 
@@ -88,11 +92,11 @@ void zh_espnow_recv_cb(const esp_now_recv_info_t *esp_now_info, const uint8_t *d
     espnow_queue_recv_data_t *recv_data = &espnow_queue.data.recv_data;
     espnow_queue.id = ESP_NOW_RECV;
     memcpy(recv_data->mac_addr, esp_now_info->src_addr, ESP_NOW_ETH_ALEN);
-    recv_data->data = malloc(data_len);
+    recv_data->data = calloc(1, data_len);
     while (recv_data->data == NULL)
     {
         vTaskDelay(1 / portTICK_PERIOD_MS);
-        recv_data->data = malloc(data_len);
+        recv_data->data = calloc(1, data_len);
     }
     memcpy(recv_data->data, data, data_len);
     recv_data->data_len = data_len;
@@ -129,6 +133,8 @@ void zh_espnow_event_handler(void *arg, esp_event_base_t event_base, int32_t eve
             case ZHPT_CONFIG:
                 zh_espnow_switch_send_mqtt_json_config_message(data, recv_data->mac_addr);
                 break;
+            case ZHPT_STATE:
+                zh_espnow_switch_send_mqtt_json_status_message(data, recv_data->mac_addr);
             default:
                 break;
             }
@@ -146,11 +152,15 @@ void zh_espnow_event_handler(void *arg, esp_event_base_t event_base, int32_t eve
         espnow_event_on_send_t *send_data = event_data;
         if (send_data->status == ESP_NOW_SEND_SUCCESS)
         {
-            // printf("ESPNOW message send success.\n");
+            // printf("ESPNOW message send OK.\n");
+        }
+        else if (send_data->status == ESP_NOW_SEND_FAIL)
+        {
+            // printf("ESPNOW message send fail.\n");
         }
         else
         {
-            // printf("ESPNOW message send fail.\n");
+            break;
         }
         break;
     default:
@@ -166,23 +176,23 @@ void zh_espnow_processing_task(void *pvParameter)
         switch (espnow_queue.id)
         {
         case ESP_NOW_SEND:
-            esp_now_peer_info_t *peer = malloc(sizeof(esp_now_peer_info_t));
+            esp_now_peer_info_t *peer = calloc(1, sizeof(esp_now_peer_info_t));
             while (peer == NULL)
             {
                 vTaskDelay(1 / portTICK_PERIOD_MS);
-                peer = malloc(sizeof(esp_now_peer_info_t));
+                peer = calloc(1, sizeof(esp_now_peer_info_t));
             }
-            memset(peer, 0, sizeof(esp_now_peer_info_t));
+            // memset(peer, 0, sizeof(esp_now_peer_info_t));
             peer->ifidx = WIFI_IF_AP;
             espnow_queue_send_data_t *send_data = &espnow_queue.data.send_data;
             memcpy(peer->peer_addr, send_data->mac_addr, ESP_NOW_ETH_ALEN);
             esp_now_add_peer(peer);
             uint8_t attempted_transmission = 0;
-            espnow_event_on_send_t *on_send = malloc(sizeof(espnow_event_on_send_t));
+            espnow_event_on_send_t *on_send = calloc(1, sizeof(espnow_event_on_send_t));
             while (on_send == NULL)
             {
                 vTaskDelay(1 / portTICK_PERIOD_MS);
-                on_send = malloc(sizeof(espnow_event_on_send_t));
+                on_send = calloc(1, sizeof(espnow_event_on_send_t));
             }
             memcpy(on_send->mac_addr, send_data->mac_addr, ESP_NOW_ETH_ALEN);
         RESEND_ESPNOW_MESSAGE:

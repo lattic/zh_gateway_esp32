@@ -40,9 +40,13 @@ void app_main()
     {
         zh_eth_init();
     }
-    else
+    else if (is_lan_connection == false)
     {
         zh_wifi_init_sta();
+    }
+    else
+    {
+        vTaskDelete(NULL);
     }
     zh_espnow_init();
     if (ota_state == ESP_OTA_IMG_PENDING_VERIFY)

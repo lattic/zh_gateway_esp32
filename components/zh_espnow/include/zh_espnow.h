@@ -11,12 +11,10 @@
 #include "zh_json.h"
 #include "zh_config.h"
 
-#define ESPNOW_TASK_PRIORITY 4
+#define ESPNOW_TASK_PRIORITY 3
 #define ESPNOW_STACK_SIZE 3072
 #define ESPNOW_QUEUE_SIZE 32
 #define MAX_NUMBER_OF_ATTEMPTS_TO_SEND 5
-
-#define MAC_STR "%02X%02X%02X%02X%02X%02X"
 
 #define DATA_SEND_SUCCESS BIT0
 #define DATA_SEND_FAIL BIT1

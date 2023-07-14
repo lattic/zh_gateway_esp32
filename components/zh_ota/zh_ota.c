@@ -18,11 +18,11 @@ void zh_self_ota_update_task(void *pvParameter)
         vTaskDelete(NULL);
     }
     const esp_app_desc_t *app_info = esp_app_get_description();
-    char *app_name = (char *)malloc(strlen(firmware_upgrade_url) + strlen(app_info->project_name) + 5 + 1);
+    char *app_name = (char *)calloc(1, strlen(firmware_upgrade_url) + strlen(app_info->project_name) + 5 + 1);
     while (app_name == NULL)
     {
         vTaskDelay(1 / portTICK_PERIOD_MS);
-        app_name = (char *)malloc(strlen(firmware_upgrade_url) + strlen(app_info->project_name) + 5 + 1);
+        app_name = (char *)calloc(1, strlen(firmware_upgrade_url) + strlen(app_info->project_name) + 5 + 1);
     }
     sprintf(app_name, "%s/%s.bin", firmware_upgrade_url, app_info->project_name);
     esp_http_client_config_t config = {

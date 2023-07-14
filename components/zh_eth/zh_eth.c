@@ -60,7 +60,6 @@ void zh_eth_event_handler(void *arg, esp_event_base_t event_base, int32_t event_
         }
         break;
     case IP_EVENT_ETH_GOT_IP:
-        xTaskCreatePinnedToCore(&zh_self_ota_update_task, "Self OTA update", OTA_STACK_SIZE, NULL, OTA_TASK_PRIORITY, NULL, tskNO_AFFINITY);
         if (mqtt_is_enable == false)
         {
             zh_mqtt_init();
