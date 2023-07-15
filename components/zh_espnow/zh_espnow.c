@@ -140,7 +140,7 @@ void zh_espnow_event_handler(void *arg, esp_event_base_t event_base, int32_t eve
             }
             break;
         case ZHDT_LED:
-            /* code */
+            // To Do.
             break;
         default:
             break;
@@ -182,7 +182,6 @@ void zh_espnow_processing_task(void *pvParameter)
                 vTaskDelay(1 / portTICK_PERIOD_MS);
                 peer = calloc(1, sizeof(esp_now_peer_info_t));
             }
-            // memset(peer, 0, sizeof(esp_now_peer_info_t));
             peer->ifidx = WIFI_IF_AP;
             espnow_queue_send_data_t *send_data = &espnow_queue.data.send_data;
             memcpy(peer->peer_addr, send_data->mac_addr, ESP_NOW_ETH_ALEN);

@@ -106,8 +106,8 @@ void zh_send_mqtt_json_attributes_message_task(void *pvParameter)
 //   "name": "gateway 0C-B8-15-26-E0-79",
 //   "unique_id": "0C-B8-15-26-E0-79-1",
 //   "device_class": "connectivity",
-//   "state_topic": "zh-home/gateway/0C-B8-15-26-E0-79/status",
-//   "json_attributes_topic": "zh-home/gateway/0C-B8-15-26-E0-79/attributes",
+//   "state_topic": "homeassistant/gateway/0C-B8-15-26-E0-79/status",
+//   "json_attributes_topic": "homeassistant/gateway/0C-B8-15-26-E0-79/attributes",
 //   "payload_on": "online",
 //   "expire_after": 30,
 //   "force_update": "true",
@@ -182,7 +182,7 @@ void zh_send_mqtt_json_config_message_task(void *pvParameter)
 
 // **** Keep alive message (always "online") from gateway to MQTT broker ***
 // Message view as:
-// zh-home/gateway/0C-B8-15-26-E0-79/status=online
+// homeassistant/gateway/0C-B8-15-26-E0-79/status=online
 void zh_send_mqtt_json_keep_alive_message_task(void *pvParameter)
 {
     esp_mqtt_client_handle_t client = pvParameter;
@@ -337,10 +337,10 @@ void zh_espnow_switch_send_mqtt_json_attributes_message(zh_espnow_data_t device_
 //   "name": "espnow_switch 34-94-54-24-A3-40",
 //   "unique_id": "34-94-54-24-A3-40-1",
 //   "device_class": "switch",
-//   "state_topic": "zh-home/espnow_switch/34-94-54-24-A3-40/state",
-//   "availability_topic": "zh-home/espnow_switch/34-94-54-24-A3-40/status",
-//   "command_topic": "zh-home/espnow_switch/34-94-54-24-A3-40/set",
-//   "json_attributes_topic": "zh-home/espnow_switch/34-94-54-24-A3-40/attributes",
+//   "state_topic": "homeassistant/espnow_switch/34-94-54-24-A3-40/state",
+//   "availability_topic": "homeassistant/espnow_switch/34-94-54-24-A3-40/status",
+//   "command_topic": "homeassistant/espnow_switch/34-94-54-24-A3-40/set",
+//   "json_attributes_topic": "homeassistant/espnow_switch/34-94-54-24-A3-40/attributes",
 //   "enabled_by_default": "true",
 //   "optimistic": "false",
 //   "payload_on": "ON",
@@ -527,7 +527,7 @@ void zh_espnow_switch_send_mqtt_json_config_message(zh_espnow_data_t device_data
 
 // **** Keep alive message from espnow_switch via gateway to MQTT broker ***
 // Message view as:
-// zh-home/espnow_switch/34-94-54-24-A3-40/status=online (offline)
+// homeassistant/espnow_switch/34-94-54-24-A3-40/status=online (offline)
 void zh_espnow_switch_send_mqtt_json_keep_alive_message(zh_espnow_data_t device_data, uint8_t device_mac[6])
 {
     extern esp_mqtt_client_handle_t client;
@@ -558,7 +558,7 @@ void zh_espnow_switch_send_mqtt_json_keep_alive_message(zh_espnow_data_t device_
 
 // **** Status message from espnow_switch via gateway to MQTT broker ***
 // Message view as:
-// zh-home/espnow_switch/34-94-54-24-A3-40/state=ON (OFF)
+// homeassistant/espnow_switch/34-94-54-24-A3-40/state=ON (OFF)
 void zh_espnow_switch_send_mqtt_json_status_message(zh_espnow_data_t device_data, uint8_t device_mac[6])
 {
     extern esp_mqtt_client_handle_t client;
@@ -577,7 +577,7 @@ void zh_espnow_switch_send_mqtt_json_status_message(zh_espnow_data_t device_data
 
 // **** Setup message to espnow_switch via gateway from MQTT broker ***
 // Message view as:
-// zh-home/espnow_switch/34-94-54-24-A3-40/set=ON (OFF)
+// homeassistant/espnow_switch/34-94-54-24-A3-40/set=ON (OFF)
 void zh_send_espnow_switch_setup_message(ha_on_off_type_t status, uint8_t device_mac[6])
 {
 

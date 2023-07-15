@@ -123,6 +123,14 @@ void zh_mqtt_event_handler(void *arg, esp_event_base_t event_base, int32_t event
             {
                 xTaskCreatePinnedToCore(&zh_self_ota_update_task, "Self OTA update", OTA_STACK_SIZE, NULL, OTA_TASK_PRIORITY, NULL, tskNO_AFFINITY);
             }
+            else if (strncmp(incoming_payload, "restart", strlen(incoming_payload) + 1) == 0)
+            {
+                esp_restart();
+            }
+            else
+            {
+                break;
+            }
             break;
         case ZHDT_SWITCH:
             switch (incoming_data_payload_type)
