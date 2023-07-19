@@ -119,17 +119,22 @@ void zh_mqtt_event_handler(void *arg, esp_event_base_t event_base, int32_t event
         switch (incoming_data_device_type)
         {
         case ZHDT_GATEWAY:
-            if (strncmp(incoming_payload, "update", strlen(incoming_payload) + 1) == 0)
+            uint8_t self_mac[6];
+            esp_read_mac(self_mac, ESP_MAC_WIFI_SOFTAP);
+            if (memcmp(self_mac, incoming_data_mac, 6) == 0)
             {
-                xTaskCreatePinnedToCore(&zh_self_ota_update_task, "Self OTA update", OTA_STACK_SIZE, NULL, OTA_TASK_PRIORITY, NULL, tskNO_AFFINITY);
-            }
-            else if (strncmp(incoming_payload, "restart", strlen(incoming_payload) + 1) == 0)
-            {
-                esp_restart();
-            }
-            else
-            {
-                break;
+                if (strncmp(incoming_payload, "update", strlen(incoming_payload) + 1) == 0)
+                {
+                    xTaskCreatePinnedToCore(&zh_self_ota_update_task, "Self OTA update", OTA_STACK_SIZE, NULL, OTA_TASK_PRIORITY, NULL, tskNO_AFFINITY);
+                }
+                else if (strncmp(incoming_payload, "restart", strlen(incoming_payload) + 1) == 0)
+                {
+                    esp_restart();
+                }
+                else
+                {
+                    break;
+                }
             }
             break;
         case ZHDT_SWITCH:
