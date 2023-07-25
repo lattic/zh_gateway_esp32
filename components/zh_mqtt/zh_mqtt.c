@@ -17,8 +17,6 @@ void zh_mqtt_init()
     esp_err_t err;
     esp_mqtt_client_config_t mqtt_config = {
         .broker.address.uri = mqtt_broker_url,
-        .task.priority = MQTT_TASK_PRIORITY,
-        .task.stack_size = MQTT_STACK_SIZE,
     };
     client = esp_mqtt_client_init(&mqtt_config);
     err = esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, zh_mqtt_event_handler, NULL);

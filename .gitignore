@@ -1,6 +1,5 @@
 build
 .build
-.pio
 .devcontainer
 .vscode
 .DS_Store

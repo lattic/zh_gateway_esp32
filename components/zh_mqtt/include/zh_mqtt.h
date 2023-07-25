@@ -7,9 +7,6 @@
 #include "zh_ota.h"
 #include "zh_config.h"
 
-#define MQTT_TASK_PRIORITY 3
-#define MQTT_STACK_SIZE 6144
-
 #ifdef __cplusplus
 extern "C"
 {
