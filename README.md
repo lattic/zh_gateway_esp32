@@ -1,6 +1,6 @@
 # Gateway
 
-Gateway for data exchange between devices and MQTT broker via WiFi/LAN.
+Gateway for data exchange between ESP-NOW devices and MQTT broker via WiFi/LAN.
 
 ## Features
 
@@ -21,4 +21,4 @@ Gateway for data exchange between devices and MQTT broker via WiFi/LAN.
 
 ## Supported devices
 
-1. To Do.
+1. [zh_espnow_switch_esp32](https://github.com/aZholtikov/zh_espnow_switch_esp32)
