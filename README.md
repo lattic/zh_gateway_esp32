@@ -22,3 +22,4 @@ Gateway for data exchange between ESP-NOW devices and MQTT broker via WiFi/LAN.
 ## Supported devices
 
 1. [zh_espnow_switch_esp32](https://github.com/aZholtikov/zh_espnow_switch_esp32)
+2. [zh_espnow_switch_esp8266](https://github.com/aZholtikov/zh_espnow_switch_esp8266)

@@ -35,6 +35,7 @@ void zh_espnow_init()
             vTaskDelay(1 / portTICK_PERIOD_MS);
             err = esp_wifi_start();
         }
+        esp_wifi_set_channel(1, 1);
         esp_wifi_set_max_tx_power(84);
     }
     esp_wifi_set_ps(WIFI_PS_NONE);
